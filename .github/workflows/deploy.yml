@@ -1,0 +1,39 @@
+# Mempublikasikan folder site/ ke GitHub Pages setiap ada push ke branch main.
+# Pengaturan sekali saja di GitHub: Settings → Pages → Build and deployment → Source: GitHub Actions.
+name: Deploy ke GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v7
+
+      - name: Siapkan GitHub Pages
+        uses: actions/configure-pages@v6
+
+      - name: Unggah folder site
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: site
+
+      - name: Publikasikan
+        id: deployment
+        uses: actions/deploy-pages@v5
