@@ -77,13 +77,14 @@ test('page works when opened straight from the file system', async ({ page }, in
 test('every section appears when the page is zoomed in (320×200 viewport)', async ({ page }) => {
   await page.setViewportSize({ width: 320, height: 200 });
   await page.goto('/');
-  await page.evaluate(async () => {
-    for (let y = 0; y <= document.body.scrollHeight; y += 150) {
-      window.scrollTo({ top: y, behavior: 'instant' });
-      await new Promise(r => setTimeout(r, 40));
-    }
-  });
-  await expect.poll(() => page.locator('.reveal:not(.is-visible)').evaluateAll(els => els.map(el => el.id || el.className)), { timeout: 3000 }).toEqual([]);
+  // Setiap bagian dibawa ke layar satu per satu (bukan digulir cepat: saat komputer sibuk,
+  // observer bisa melewatkan posisi gulir yang hanya sekejap).
+  const reveals = page.locator('.reveal');
+  const count = await reveals.count();
+  for (let i = 0; i < count; i++) {
+    await reveals.nth(i).evaluate(el => el.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    await expect(reveals.nth(i)).toHaveClass(/is-visible/);
+  }
 });
 
 test('sections stay visible when main.js fails to load', async ({ page }) => {
@@ -113,4 +114,17 @@ test('opening the mobile menu moves keyboard focus to the first menu link', asyn
   await page.keyboard.press('Escape');
   await expect(page.locator('.menu-toggle')).toBeFocused();
   await expect(page.locator('.menu-toggle')).toHaveAttribute('aria-expanded', 'false');
+});
+
+test.describe('without JavaScript on a phone', () => {
+  test.use({ javaScriptEnabled: false });
+
+  test('menu links stay reachable and the ☰ button is hidden', async ({ page }, info) => {
+    test.skip(info.project.name !== 'mobile', 'menu ☰ hanya ada di HP');
+    await page.goto('/');
+    await expect(page.locator('.menu-toggle')).toBeHidden();
+    await expect(page.locator('#site-nav a[href="#galeri"]')).toBeVisible();
+    const { scrollWidth, clientWidth } = await page.evaluate(() => ({ scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth }));
+    expect(scrollWidth).toBeLessThanOrEqual(clientWidth);
+  });
 });

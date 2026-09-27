@@ -87,7 +87,7 @@ test('keyboard focus shows a 3px accent outline', async ({ page }, info) => {
 
 test('touch targets are at least 44px on mobile', async ({ page }, info) => {
   test.skip(info.project.name !== 'mobile', 'area sentuh diuji di HP');
-  const targets = page.locator('.menu-toggle, .lang-switch button, .hero__actions a, .filter');
+  const targets = page.locator('.menu-toggle, .lang-switch button, .hero__actions a, .filter, .brand, .footer__top');
   const count = await targets.count();
   expect(count).toBeGreaterThanOrEqual(9);
   for (let i = 0; i < count; i++) {
@@ -97,4 +97,17 @@ test('touch targets are at least 44px on mobile', async ({ page }, info) => {
     expect(b.width, await t.evaluate(el => el.outerHTML.slice(0, 60))).toBeGreaterThanOrEqual(44);
     expect(b.height, await t.evaluate(el => el.outerHTML.slice(0, 60))).toBeGreaterThanOrEqual(44);
   }
+});
+
+test('focus ring stays clearly visible on navy backgrounds', async ({ page }, info) => {
+  test.skip(info.project.name !== 'desktop', 'fokus keyboard diuji di desktop');
+  const ring = el => getComputedStyle(el).outlineColor;
+  const email = page.locator('.contact__actions a').first();
+  await email.focus();
+  expect(await email.evaluate(ring)).toBe('rgb(224, 161, 132)');
+  await page.locator('.gallery__item[data-id="g01"] .gallery__thumb').focus();
+  await page.keyboard.press('Enter');
+  const close = page.locator('.lightbox__close');
+  await expect(close).toBeFocused();
+  expect(await close.evaluate(ring)).toBe('rgb(224, 161, 132)');
 });

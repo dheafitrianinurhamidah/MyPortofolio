@@ -65,6 +65,9 @@ button { font: inherit; color: inherit; }
   outline-offset: 2px;
 }
 
+.contact :focus-visible,
+.lightbox :focus-visible { outline-color: var(--ring); }
+
 section[id] { scroll-margin-top: 80px; }
 
 .icon {
@@ -220,6 +223,9 @@ h3 {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   margin-right: auto;
   font-size: 1.5rem;
   font-weight: 800;
@@ -949,6 +955,9 @@ h1 em { font-style: normal; color: var(--accent); }
 }
 
 .footer__top {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font-weight: 700;
   color: var(--accent);
   text-decoration: none;
@@ -993,14 +1002,17 @@ html:has(.lightbox[open]) { overflow: hidden; }
   max-height: 100%;
   margin: 0;
   padding: 72px 16px 88px;
+  overflow: auto;
   border: 0;
   background: transparent;
   color: var(--bg);
 }
 .lightbox[open] {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: safe center;
+  gap: 10px;
 }
 .lightbox::backdrop { background: rgba(31, 42, 68, 0.92); }
 
@@ -1016,12 +1028,14 @@ html:has(.lightbox[open]) { overflow: hidden; }
 .lightbox__img {
   width: auto;
   max-width: 90vw;
-  max-height: 64vh;
+  max-height: min(64vh, calc(100vh - 290px));
   border-radius: 12px;
   object-fit: contain;
   background: #121a2e;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
+  transition: opacity 0.2s ease;
 }
+.lightbox[aria-busy="true"] .lightbox__img { opacity: 0.5; }
 
 .lightbox__caption {
   max-width: 60ch;
@@ -1062,7 +1076,7 @@ html:has(.lightbox[open]) { overflow: hidden; }
 
 @media (min-width: 640px) {
   .lightbox { padding: 72px 88px; }
-  .lightbox__img { max-height: 78vh; }
+  .lightbox__img { max-height: min(78vh, calc(100vh - 240px)); }
   .lightbox__prev,
   .lightbox__next {
     top: 50%;
@@ -1071,4 +1085,35 @@ html:has(.lightbox[open]) { overflow: hidden; }
   }
   .lightbox__prev { left: 20px; }
   .lightbox__next { right: 20px; }
+}
+
+/* Layar pendek (HP dimiringkan): kurangi ruang atas-bawah agar foto dan keterangan muat. */
+@media (max-height: 500px) {
+  .lightbox { padding-block: 16px; }
+  .lightbox__img { max-height: calc(100vh - 130px); }
+}
+
+/* ---------- Tanpa JavaScript ---------- */
+
+/* Tombol ID · EN dan ☰ butuh JavaScript: sembunyikan, dan tampilkan tautan menu apa adanya di layar kecil. */
+html:not(.js) .lang-switch { display: none; }
+
+@media (max-width: 959px) {
+  html:not(.js) .menu-toggle { display: none; }
+  html:not(.js) .header__inner { flex-wrap: wrap; }
+  html:not(.js) .site-nav {
+    display: block;
+    order: 3;
+    width: 100%;
+  }
+  html:not(.js) .site-nav__list {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 0 16px;
+    padding: 0 0 10px;
+  }
+  html:not(.js) .site-nav__list a {
+    padding: 8px 0;
+    border: 0;
+  }
 }

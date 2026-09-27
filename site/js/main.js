@@ -177,22 +177,38 @@
     var counter = dialog.querySelector('.lightbox__counter');
     var image = document.createElement('img'); // dibuat saat dibutuhkan agar tidak ada <img> tanpa src di halaman
     image.className = 'lightbox__img';
-    var current = null;
+    var current = null; // item yang dituju (tombol ‹ › berpindah dari sini)
+    var pending = null; // item yang fotonya sedang dimuat
     var opener = null;
 
     function visibleItems() {
       return items.filter(function (item) { return !item.hidden; });
     }
 
-    function show(item) {
-      var link = item.querySelector('.gallery__thumb');
+    /* Keterangan, alt, dan penghitung baru dipasang setelah fotonya termuat,
+       supaya teks tidak pernah mendahului foto di jaringan lambat. */
+    function finishShow() {
+      if (!pending) return;
+      var item = pending;
       var list = visibleItems();
-      current = item;
-      if (!image.parentNode) figure.insertBefore(image, caption);
-      image.src = link.getAttribute('href');
-      image.alt = link.querySelector('img').alt;
+      pending = null;
+      image.alt = item.querySelector('.gallery__thumb img').alt;
       caption.textContent = item.querySelector('.gallery__caption').textContent;
       counter.textContent = (list.indexOf(item) + 1) + ' / ' + list.length;
+      dialog.removeAttribute('aria-busy');
+    }
+
+    image.addEventListener('load', finishShow);
+    image.addEventListener('error', finishShow);
+
+    function show(item) {
+      var href = item.querySelector('.gallery__thumb').getAttribute('href');
+      current = item;
+      pending = item;
+      dialog.setAttribute('aria-busy', 'true');
+      if (!image.parentNode) figure.insertBefore(image, caption);
+      if (image.getAttribute('src') === href && image.complete) finishShow();
+      else image.src = href;
     }
 
     function step(delta) {

@@ -87,3 +87,43 @@ test.describe('without JavaScript', () => {
     await expect(thumb(page, 'g01')).toHaveAttribute('href', 'assets/img/gallery/full/g01-telkom-forum-expert-q2-2026.jpg');
   });
 });
+
+// --- Temuan kecil tinjauan akhir ---
+
+test('lightbox fits a landscape phone screen', async ({ page }) => {
+  await page.setViewportSize({ width: 740, height: 360 });
+  await page.goto('/#galeri');
+  await thumb(page, 'g04').click();
+  await expect.poll(() => page.locator('.lightbox__img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+  await expect(page.locator('.lightbox__counter')).toHaveText('4 / 11');
+  const img = await page.locator('.lightbox__img').boundingBox();
+  const counter = await page.locator('.lightbox__counter').boundingBox();
+  expect(img.y).toBeGreaterThanOrEqual(0);
+  expect(counter.y + counter.height).toBeLessThanOrEqual(360);
+});
+
+test('caption waits for the new photo while it is still loading', async ({ page }) => {
+  await page.goto('/#galeri');
+  await thumb(page, 'g01').click();
+  await expect(page.locator('.lightbox__counter')).toHaveText('1 / 11');
+  await expect.poll(() => page.locator('.lightbox__img').evaluate(img => img.complete && img.naturalWidth > 0)).toBe(true);
+  let release;
+  const gate = new Promise(resolve => { release = resolve; });
+  await page.route('**/gallery/full/g02-*.jpg', async route => { await gate; await route.continue(); });
+  await page.click('.lightbox__next');
+  await expect(page.locator('dialog.lightbox')).toHaveAttribute('aria-busy', 'true');
+  await expect(page.locator('.lightbox__caption')).toHaveText(byId('g01').caption);
+  await expect(page.locator('.lightbox__counter')).toHaveText('1 / 11');
+  release();
+  await expect(page.locator('.lightbox__caption')).toHaveText(byId('g02').caption);
+  await expect(page.locator('.lightbox__counter')).toHaveText('2 / 11');
+  await expect(page.locator('dialog.lightbox')).not.toHaveAttribute('aria-busy', 'true');
+});
+
+test('lightbox keeps valid figure markup and announces caption changes', async ({ page }) => {
+  await page.goto('/#galeri');
+  await thumb(page, 'g01').click();
+  await expect(page.locator('.lightbox__img')).toBeVisible();
+  expect(await page.locator('.lightbox__figure').evaluate(fig => [...fig.children].map(el => el.tagName))).toEqual(['IMG', 'FIGCAPTION']);
+  await expect(page.locator('.lightbox__caption')).toHaveAttribute('aria-live', 'polite');
+});
