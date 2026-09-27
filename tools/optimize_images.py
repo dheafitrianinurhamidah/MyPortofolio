@@ -83,22 +83,43 @@ def resize_long_edge(im, edge):
     return im.resize((round(im.width * scale), round(im.height * scale)), Image.LANCZOS)
 
 
+def skipped(path):
+    """Foto asli tidak ada (mis. di komputer lain): lewati tanpa menghentikan skrip; hasil lama tetap dipakai."""
+    print(f"  dilewati (file asli tidak ditemukan): {path.relative_to(ROOT)}")
+
+
 def main():
     print("Foto profil:")
-    im = load(PROFILE_SRC)
-    side = min(im.size)
-    square = im.crop((0, 0, side, side))  # bujur sangkar menempel tepi atas: hijab utuh, wajah di tengah
-    save(square.resize((PROFILE_SIZE, PROFILE_SIZE), Image.LANCZOS), IMG / "profile.jpg", PROFILE_Q, PROFILE_MAX)
+    if PROFILE_SRC.exists():
+        im = load(PROFILE_SRC)
+        side = min(im.size)
+        left = (im.width - side) // 2
+        # bujur sangkar menempel tepi atas (hijab utuh, wajah di tengah) dan di tengah secara horizontal
+        square = im.crop((left, 0, left + side, side))
+        save(square.resize((PROFILE_SIZE, PROFILE_SIZE), Image.LANCZOS), IMG / "profile.jpg", PROFILE_Q, PROFILE_MAX)
+    else:
+        skipped(PROFILE_SRC)
 
     print("Galeri:")
     for src_name, slug in GALLERY:
-        im = load(PHOTOS / src_name)
+        source = PHOTOS / src_name
+        if not source.exists():
+            skipped(source)
+            continue
+        im = load(source)
         save(resize_to_width(im, THUMB_WIDTH), IMG / "gallery" / "thumb" / f"{slug}.jpg", THUMB_Q, THUMB_MAX)
         save(resize_long_edge(im, FULL_EDGE), IMG / "gallery" / "full" / f"{slug}.jpg", FULL_Q, FULL_MAX)
 
-    CV_OUT.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(CV_SRC, CV_OUT)
-    print(f"CV: {CV_OUT.relative_to(ROOT)}")
+    # CV hanya disalin sekali. Setelah itu site/assets adalah tempat CV yang berlaku,
+    # jadi CV yang sudah diganti di sana tidak pernah ditimpa oleh CV lama.
+    if CV_OUT.exists():
+        print(f"CV: {CV_OUT.relative_to(ROOT)} sudah ada, tidak ditimpa")
+    elif CV_SRC.exists():
+        CV_OUT.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(CV_SRC, CV_OUT)
+        print(f"CV: disalin ke {CV_OUT.relative_to(ROOT)}")
+    else:
+        skipped(CV_SRC)
 
 
 if __name__ == "__main__":
