@@ -1,5 +1,6 @@
 // Dua bahasa (spec §5): teks ID di HTML, teks EN di window.I18N_EN, tombol ID · EN.
 const { test, expect } = require('@playwright/test');
+const fs = require('fs');
 const path = require('path');
 const { pathToFileURL } = require('url');
 
@@ -142,4 +143,12 @@ test('menu button label follows the language', async ({ page }, info) => {
   await expect(toggle).toHaveAttribute('aria-label', dict['menu.open']);
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-label', dict['menu.close']);
+});
+
+test('English dictionary uses double-quoted strings so apostrophes are safe to type', ({}, info) => {
+  test.skip(info.project.name !== 'desktop', 'pemeriksaan file cukup sekali');
+  const source = fs.readFileSync(path.join(__dirname, '..', 'site', 'js', 'i18n-en.js'), 'utf8');
+  const entries = source.split('\n').filter(line => /^\s+['"][\w.]+['"]\s*:/.test(line));
+  expect(entries.length).toBeGreaterThan(100);
+  expect(entries.filter(line => !/^\s+"[\w.]+": ".*",?$/.test(line))).toEqual([]);
 });
