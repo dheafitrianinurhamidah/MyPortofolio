@@ -115,7 +115,11 @@
     }
 
     toggle.addEventListener('click', function () {
-      setOpen(!isOpen());
+      var open = !isOpen();
+      setOpen(open);
+      // Tautan menu berada sebelum tombol ☰ di urutan halaman: pindahkan fokus ke sana agar
+      // pengguna keyboard dan pembaca layar langsung masuk ke menu yang baru dibuka.
+      if (open) nav.querySelector('a').focus();
     });
     nav.addEventListener('click', function (event) {
       if (event.target.closest('a')) setOpen(false);
@@ -145,7 +149,7 @@
         entry.target.classList.add('is-visible');
         observer.unobserve(entry.target);
       });
-    }, { threshold: 0.12 });
+    }, { threshold: 0, rootMargin: '0px 0px -10% 0px' }); // ambang 0: bagian yang lebih tinggi dari layar (mis. saat di-zoom) tetap muncul
     items.forEach(function (el) { observer.observe(el); });
   }
 
@@ -221,10 +225,16 @@
   }
 
   function init() {
-    initMenu(); // sebelum initLanguage: menu mendengarkan "langchange" untuk labelnya
-    initLanguage();
-    initReveal();
-    initGallery();
+    try {
+      initMenu(); // sebelum initLanguage: menu mendengarkan "langchange" untuk labelnya
+      initLanguage();
+      initReveal();
+      initGallery();
+    } catch (error) {
+      // Jangan biarkan bagian yang menunggu animasi tetap tersembunyi bila skrip gagal di tengah jalan.
+      document.documentElement.classList.remove('js');
+      throw error;
+    }
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

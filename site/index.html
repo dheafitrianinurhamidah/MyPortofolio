@@ -378,6 +378,7 @@
   </footer>
 
   <script src="js/i18n-en.js" defer></script>
-  <script src="js/main.js" defer></script>
+  <!-- onerror: bila main.js gagal dimuat, tampilkan semua bagian tanpa animasi -->
+  <script src="js/main.js" defer onerror="document.documentElement.classList.remove('js')"></script>
 </body>
 </html>

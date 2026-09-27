@@ -71,3 +71,46 @@ test('page works when opened straight from the file system', async ({ page }, in
     await expect(page.locator('#prestasi')).toHaveClass(/is-visible/);
   }
 });
+
+// --- Temuan tinjauan akhir ---
+
+test('every section appears when the page is zoomed in (320×200 viewport)', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 200 });
+  await page.goto('/');
+  await page.evaluate(async () => {
+    for (let y = 0; y <= document.body.scrollHeight; y += 150) {
+      window.scrollTo({ top: y, behavior: 'instant' });
+      await new Promise(r => setTimeout(r, 40));
+    }
+  });
+  await expect.poll(() => page.locator('.reveal:not(.is-visible)').evaluateAll(els => els.map(el => el.id || el.className)), { timeout: 3000 }).toEqual([]);
+});
+
+test('sections stay visible when main.js fails to load', async ({ page }) => {
+  await page.route('**/js/main.js', route => route.abort());
+  await page.goto('/');
+  const reveals = page.locator('.reveal');
+  const count = await reveals.count();
+  for (let i = 0; i < count; i++) await expect(reveals.nth(i)).toHaveCSS('opacity', '1');
+});
+
+test('sections stay visible when a script error stops start-up', async ({ page }) => {
+  await page.addInitScript(() => { window.IntersectionObserver = function () { throw new Error('rusak'); }; });
+  await page.goto('/');
+  const reveals = page.locator('.reveal');
+  const count = await reveals.count();
+  for (let i = 0; i < count; i++) await expect(reveals.nth(i)).toHaveCSS('opacity', '1');
+});
+
+test('opening the mobile menu moves keyboard focus to the first menu link', async ({ page }, info) => {
+  test.skip(info.project.name !== 'mobile', 'menu ☰ hanya ada di HP');
+  await page.goto('/');
+  await page.locator('.menu-toggle').focus();
+  await page.keyboard.press('Enter');
+  await expect(page.locator('#site-nav a[href="#tentang"]')).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(page.locator('#site-nav a[href="#pengalaman"]')).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.menu-toggle')).toBeFocused();
+  await expect(page.locator('.menu-toggle')).toHaveAttribute('aria-expanded', 'false');
+});
