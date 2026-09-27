@@ -1,0 +1,14 @@
+# File asli (tidak dipublikasikan; versi yang sudah dioptimalkan ada di site/assets)
+Foto Kegiatan/
+WhatsApp Image *.jpeg
+CV Dhea Fitriani N.H. 2025.pdf
+
+# Alat bantu & hasil sementara
+.superpowers/
+node_modules/
+test-results/
+playwright-report/
+__pycache__/
+
+# Sistem operasi
+.DS_Store
