@@ -57,9 +57,9 @@ test('hero is two columns on desktop and stacked with photo first on mobile', as
 });
 
 test('stats are 4 across on desktop and 2x2 on mobile', async ({ page }, info) => {
-  const stats = page.locator('.stat');
-  const ys = [];
-  for (let i = 0; i < 4; i++) ys.push(Math.round((await box(stats.nth(i))).y));
+  // Diukur dalam satu panggilan (satu frame): bagian ini sedang beranimasi muncul saat halaman dibuka.
+  const ys = await page.locator('.stat').evaluateAll(els => els.map(el => Math.round(el.getBoundingClientRect().top)));
+  expect(ys).toHaveLength(4);
   if (info.project.name === 'desktop') {
     expect(new Set(ys).size).toBe(1);
   } else {
