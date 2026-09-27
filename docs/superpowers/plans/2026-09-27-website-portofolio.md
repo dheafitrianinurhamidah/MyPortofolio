@@ -260,18 +260,19 @@ test('section eyebrows and footer follow the spec', ...)
 `tests/privacy.spec.js`:
 
 ```js
-const PHONE = /(\+?62|0)[\s.-]?8[\s.-]?21[\s.-]?xxxx[\s.-]?xxxx/;
+// Nomor HP tidak ditulis di repo publik: yang disimpan hanya sidik jari SHA-256 dari 11 digitnya.
+const PHONE_SHA256 = '<sha256 dari nomor HP tanpa 0/+62 di depan>';
+const containsNumber = (text, hash = PHONE_SHA256) => /* cocokkan setiap potongan 11 digit dari text tanpa pemisah */;
 test('no phone number or WhatsApp link in any site text file', () => {
   for (const f of walk('site').filter(f => /\.(html|css|js|svg|json|txt|xml|webmanifest)$/.test(f))) {
     const t = fs.readFileSync(f, 'utf8');
-    expect(t, f).not.toMatch(PHONE);
-    expect(t.replace(/\D/g, ''), f).not.toContain('821xxxxxxxx');
+    expect(containsNumber(t), f).toBe(false);
     expect(t, f).not.toMatch(/wa\.me|api\.whatsapp\.com/);
   }
 });
 test('rendered page shows no phone number', async ({ page }) => {
   await page.goto('/');
-  expect((await page.content()).replace(/\D/g, '')).not.toContain('821xxxxxxxx');
+  expect(containsNumber(await page.content())).toBe(false);
 });
 ```
 

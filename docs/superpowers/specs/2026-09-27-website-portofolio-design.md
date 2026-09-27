@@ -269,7 +269,7 @@ Kontras yang sudah dihitung (WCAG AA):
 - **CV:** salinan PDF asli di `site/assets/CV-Dhea-Fitriani-Nur-Hamidah.pdf`.
 - **Tidak dipublikasikan:** foto asli dan CV asli (sudah di `.gitignore`).
 - **Aturan privasi (diuji):**
-  - Tidak ada nomor HP dalam format apa pun (`0821…`, `+62 821…`, `821-xxxx-xxxx`, dan sejenisnya) di file teks mana pun di `site/`.
+  - Tidak ada nomor HP dalam format apa pun (diawali 0 atau +62, dengan atau tanpa spasi/tanda hubung) di file teks mana pun di `site/`. Nomornya sendiri tidak ditulis di repo; tes memakai sidik jari SHA-256.
   - Tidak ada tautan `wa.me` / `api.whatsapp.com`.
 
 ## 7. Aksesibilitas & kinerja
