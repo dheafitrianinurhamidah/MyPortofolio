@@ -118,6 +118,10 @@ window.I18N_EN = {
   'gallery.g10.alt': 'Group photo of the Muhibah Angklung Team in traditional costumes in a town square at dusk',
   'gallery.g11': 'Team spirit in traditional Indonesian attire',
   'gallery.g11.alt': 'Cheerful selfie of team members wearing traditional Indonesian costumes and headdresses',
+  'lightbox.label': 'Photo viewer',
+  'lightbox.close': 'Close',
+  'lightbox.prev': 'Previous photo',
+  'lightbox.next': 'Next photo',
 
   'contact.eyebrow': 'Contact',
   'contact.title': 'Let’s Connect',

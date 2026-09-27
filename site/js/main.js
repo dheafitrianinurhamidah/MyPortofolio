@@ -1,4 +1,4 @@
-/* Portofolio Dhea — perilaku halaman: menu HP, dua bahasa, dan animasi muncul.
+/* Portofolio Dhea — perilaku halaman: menu HP, dua bahasa, animasi muncul, dan galeri.
    Script biasa (bukan ES module) agar tetap jalan saat index.html dibuka langsung dari folder. */
 (function () {
   'use strict';
@@ -149,10 +149,82 @@
     items.forEach(function (el) { observer.observe(el); });
   }
 
+  /* Galeri: filter kategori dan tampilan foto besar (<dialog>). Tanpa JS, foto kecil tetap
+     menautkan ke foto besar. Keterangan dibaca dari DOM, jadi otomatis mengikuti bahasa aktif. */
+  function initGallery() {
+    var filters = document.querySelectorAll('.gallery__filters .filter');
+    var items = Array.prototype.slice.call(document.querySelectorAll('.gallery__item'));
+
+    filters.forEach(function (button) {
+      button.addEventListener('click', function () {
+        var category = button.getAttribute('data-filter');
+        filters.forEach(function (other) { other.setAttribute('aria-pressed', String(other === button)); });
+        items.forEach(function (item) {
+          item.hidden = category !== 'semua' && item.getAttribute('data-category') !== category;
+        });
+      });
+    });
+
+    var dialog = document.querySelector('.lightbox');
+    if (!dialog || typeof dialog.showModal !== 'function') return;
+
+    var figure = dialog.querySelector('.lightbox__figure');
+    var caption = dialog.querySelector('.lightbox__caption');
+    var counter = dialog.querySelector('.lightbox__counter');
+    var image = document.createElement('img'); // dibuat saat dibutuhkan agar tidak ada <img> tanpa src di halaman
+    image.className = 'lightbox__img';
+    var current = null;
+    var opener = null;
+
+    function visibleItems() {
+      return items.filter(function (item) { return !item.hidden; });
+    }
+
+    function show(item) {
+      var link = item.querySelector('.gallery__thumb');
+      var list = visibleItems();
+      current = item;
+      if (!image.parentNode) figure.insertBefore(image, caption);
+      image.src = link.getAttribute('href');
+      image.alt = link.querySelector('img').alt;
+      caption.textContent = item.querySelector('.gallery__caption').textContent;
+      counter.textContent = (list.indexOf(item) + 1) + ' / ' + list.length;
+    }
+
+    function step(delta) {
+      var list = visibleItems();
+      show(list[(list.indexOf(current) + delta + list.length) % list.length]);
+    }
+
+    items.forEach(function (item) {
+      item.querySelector('.gallery__thumb').addEventListener('click', function (event) {
+        event.preventDefault();
+        opener = event.currentTarget;
+        show(item);
+        dialog.showModal();
+      });
+    });
+
+    dialog.querySelector('.lightbox__prev').addEventListener('click', function () { step(-1); });
+    dialog.querySelector('.lightbox__next').addEventListener('click', function () { step(1); });
+    dialog.querySelector('.lightbox__close').addEventListener('click', function () { dialog.close(); });
+    dialog.addEventListener('keydown', function (event) {
+      if (event.key === 'ArrowRight') step(1);
+      else if (event.key === 'ArrowLeft') step(-1);
+    });
+    dialog.addEventListener('click', function (event) {
+      if (event.target === dialog) dialog.close(); // klik di area gelap, di luar foto dan tombol
+    });
+    dialog.addEventListener('close', function () {
+      if (opener) opener.focus();
+    });
+  }
+
   function init() {
     initMenu(); // sebelum initLanguage: menu mendengarkan "langchange" untuk labelnya
     initLanguage();
     initReveal();
+    initGallery();
   }
 
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init);

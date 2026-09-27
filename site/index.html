@@ -21,6 +21,9 @@
     <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z"/></symbol>
     <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M7 4h10v4a5 5 0 0 1-10 0z"/><path d="M17 5h2a2 2 0 0 1 0 4h-2"/><path d="M7 5H5a2 2 0 0 0 0 4h2"/><path d="M12 13v4"/><path d="M8 21h8"/><path d="M9 17h6v4H9z"/></symbol>
     <symbol id="i-badge" viewBox="0 0 24 24"><circle cx="12" cy="9" r="6"/><path d="m8.5 14-1.5 7 5-3 5 3-1.5-7"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+    <symbol id="i-prev" viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></symbol>
+    <symbol id="i-next" viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></symbol>
     <symbol id="i-linkedin" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M4.98 3.5a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5zM3 9.5h4V21H3zM9.5 9.5h3.8v1.6h.05c.53-1 1.83-2.05 3.77-2.05 4.03 0 4.78 2.65 4.78 6.1V21h-4v-5.1c0-1.22-.02-2.78-1.7-2.78-1.7 0-1.96 1.33-1.96 2.7V21h-4z"/></symbol>
   </svg>
 
@@ -335,6 +338,17 @@
         </div>
       </div>
     </section>
+
+    <!-- Tampilan foto besar; gambar, keterangan, dan penghitung diisi oleh main.js dari item galeri -->
+    <dialog class="lightbox" aria-label="Tampilan foto" data-i18n-attr="aria-label:lightbox.label">
+      <button type="button" class="lightbox__close" aria-label="Tutup" data-i18n-attr="aria-label:lightbox.close"><svg class="icon" width="24" height="24" aria-hidden="true"><use href="#i-close"/></svg></button>
+      <button type="button" class="lightbox__prev" aria-label="Foto sebelumnya" data-i18n-attr="aria-label:lightbox.prev"><svg class="icon" width="24" height="24" aria-hidden="true"><use href="#i-prev"/></svg></button>
+      <figure class="lightbox__figure">
+        <figcaption class="lightbox__caption"></figcaption>
+        <p class="lightbox__counter"></p>
+      </figure>
+      <button type="button" class="lightbox__next" aria-label="Foto berikutnya" data-i18n-attr="aria-label:lightbox.next"><svg class="icon" width="24" height="24" aria-hidden="true"><use href="#i-next"/></svg></button>
+    </dialog>
   </main>
 
   <footer class="site-footer">
